@@ -157,6 +157,13 @@ function(BFSDE_ADD_P4_PROGRAM t p4target p4src p4lang p4arch bfrt p4rt withpd wi
   bfsde_p4_check_rt("${bfrt}" "${p4rt}" "${withpd}" "${withthrift}")
   p4_check_p4flags()
   bfsde_p4_check_pdflags()
+  if (("${p4target}" STREQUAL "tofino2m") OR
+      ("${p4target}" STREQUAL "tofino2u") OR
+      ("${p4target}" STREQUAL "tofino2a0"))
+    set(chiptype "tofino2")
+  else()
+    set(chiptype "${p4target}")
+  endif()
 
   set(output_files "${CMAKE_CURRENT_BINARY_DIR}/${target_path}/manifest.json")
   set(rt_commands "")
@@ -166,6 +173,8 @@ function(BFSDE_ADD_P4_PROGRAM t p4target p4src p4lang p4arch bfrt p4rt withpd wi
     set(output_files "${output_files}" "${CMAKE_CURRENT_BINARY_DIR}/${target_path}/bf-rt.json")
     set(rt_commands "${rt_commands}" "--bf-rt-schema" "${target_path}/bf-rt.json")
     set(depends_target "${depends_target}" "${CMAKE_CURRENT_BINARY_DIR}/${target_path}/bf-rt.json")
+    find_bf_p4c_gen_bfrt_conf(REQUIRED)
+    find_bf_p4c_manifest_config(REQUIRED)
   else()
     # disable default behaviour of bf-p4c
     set(P4FLAGS_INTERNAL ${P4FLAGS_INTERNAL} --no-bf-rt-schema)
@@ -179,10 +188,19 @@ function(BFSDE_ADD_P4_PROGRAM t p4target p4src p4lang p4arch bfrt p4rt withpd wi
   # compile the p4 program
   find_bf_p4c(REQUIRED)
   find_bf_driver(REQUIRED)
-  add_custom_command(OUTPUT ${output_files}
-    COMMAND "${BF_P4C}" --std "${p4lang}" --target "${p4target}" --arch "${p4arch}" ${rt_commands} -o "${CMAKE_CURRENT_BINARY_DIR}/${target_path}" ${COMPUTED_P4PPFLAGS} ${COMPUTED_P4FLAGS} ${P4FLAGS_INTERNAL} -g --program-name "${t}" "${CMAKE_CURRENT_SOURCE_DIR}/${p4src}"
-    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${p4src}"
-  )
+  if (bfrt)
+    add_custom_command(OUTPUT ${output_files}
+      COMMAND "${BF_P4C}" --std "${p4lang}" --target "${p4target}" --arch "${p4arch}" ${rt_commands} -o "${CMAKE_CURRENT_BINARY_DIR}/${target_path}" ${COMPUTED_P4PPFLAGS} ${COMPUTED_P4FLAGS} ${P4FLAGS_INTERNAL} -g --program-name "${t}" "${CMAKE_CURRENT_SOURCE_DIR}/${p4src}"
+      COMMAND "${BF_P4C_GEN_BFRT_CONF}" --name "${t}" --device "${chiptype}" --testdir "${CMAKE_CURRENT_BINARY_DIR}/${target_path}"
+         --installdir "${CMAKE_CURRENT_BINARY_DIR}/${target_path}" --pipe `${BF_P4C_MANIFEST_CONFIG} --pipe "${CMAKE_CURRENT_BINARY_DIR}/${target_path}/manifest.json" `
+      DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${p4src}"
+    )
+  else()
+    add_custom_command(OUTPUT ${output_files}
+      COMMAND "${BF_P4C}" --std "${p4lang}" --target "${p4target}" --arch "${p4arch}" ${rt_commands} -o "${CMAKE_CURRENT_BINARY_DIR}/${target_path}" ${COMPUTED_P4PPFLAGS} ${COMPUTED_P4FLAGS} ${P4FLAGS_INTERNAL} -g --program-name "${t}" "${CMAKE_CURRENT_SOURCE_DIR}/${p4src}"
+      DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${p4src}"
+    )
+  endif()
   add_custom_target("${t}-${p4target}-conf" ALL DEPENDS ${output_files})
   add_dependencies("${t}-${p4target}" "${t}-${p4target}-conf")
 
