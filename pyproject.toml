@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=64", "setuptools_scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "p4ws"
+dynamic = ["version"]
+dependencies = [ ]
+requires-python = ">=3.5"
+authors = [
+  { name="NTLPY", email="59137305+NTLPY@users.noreply.github.com" },
+]
+maintainers = [
+  { name="NTLPY", email="59137305+NTLPY@users.noreply.github.com" },
+]
+description = "P4 Workshop"
+readme = "README.md"
+keywords = ["network", "p4"]
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Environment :: Console",
+  "License :: OSI Approved :: Apache Software License",
+  "Natural Language :: English",
+  "Programming Language :: Python :: 3",
+  "Operating System :: POSIX :: Linux",
+  "Topic :: Scientific/Engineering"
+]
+
+[project.optional-dependencies]
+
+[project.urls]
+Homepage = "https://github.com/NTLPY/p4ws"
+Documentation = "https://github.com/NTLPY/p4ws/blob/master/docs/README.md"
+Repository = "https://github.com/NTLPY/p4ws.git/"
+"Bug Tracker" = "https://github.com/NTLPY/p4ws/issues"
+Changelog = "https://github.com/NTLPY/p4ws/blob/master/CHANGELOG.md"
+
+[tool.setuptools_scm]
