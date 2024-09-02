@@ -1,0 +1,10 @@
+{
+    "recommendations": [
+        "ms-python.autopep8",
+        "ms-python.isort",
+        "ms-python.python",
+        "ms-vscode.cmake-tools",
+        "ms-vscode.cpptools-extension-pack",
+        "yzhang.markdown-all-in-one"
+    ]
+}

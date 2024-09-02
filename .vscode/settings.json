@@ -1,0 +1,7 @@
+{
+    "C_Cpp.autoAddFileAssociations": false,
+    "json.format.keepLines": true,
+    "markdown.extension.list.indentationSize": "inherit",
+    "markdown.extension.toc.levels": "2..6",
+    "python.analysis.typeCheckingMode": "basic",
+}
