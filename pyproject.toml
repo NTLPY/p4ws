@@ -27,6 +27,9 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
+loadmn = [
+  "mininet"
+]
 
 [project.urls]
 Homepage = "https://github.com/NTLPY/p4ws"
