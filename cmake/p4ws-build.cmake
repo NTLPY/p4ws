@@ -45,6 +45,32 @@ include(utils)
 
 
 ###############################################################################
+# Paths
+###############################################################################
+
+function(P4_TARGET_INCLUDE_DIRECTORIES t)
+  get_target_property(EXISTING_P4_INCLUDE_DIRECTORIES "${t}" P4_INCLUDE_DIRECTORIES)
+  
+  set(ABSOLUTE_INCLUDE_DIRECTORIES)
+  # Convert to absolute path
+  foreach(dir ${ARGN})
+    if(NOT IS_ABSOLUTE "${dir}")
+      get_filename_component(dir "${dir}" ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}")
+    endif()
+    list(APPEND ABSOLUTE_INCLUDE_DIRECTORIES "${dir}")
+  endforeach()
+
+  if(EXISTING_P4_INCLUDE_DIRECTORIES)
+    list(APPEND P4_INCLUDE_DIRECTORIES ${EXISTING_P4_INCLUDE_DIRECTORIES} ${ABSOLUTE_INCLUDE_DIRECTORIES})
+  else()
+    set(P4_INCLUDE_DIRECTORIES ${ABSOLUTE_INCLUDE_DIRECTORIES})
+  endif()
+
+  set_target_properties("${t}" PROPERTIES P4_INCLUDE_DIRECTORIES "${P4_INCLUDE_DIRECTORIES}")
+endfunction()
+
+
+###############################################################################
 # Check Common Parameters
 ###############################################################################
 
