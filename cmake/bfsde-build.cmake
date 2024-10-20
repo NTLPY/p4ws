@@ -180,9 +180,9 @@ function(BFSDE_ADD_P4_PROGRAM t p4target p4src p4lang p4arch bfrt p4rt withpd wi
     set(P4FLAGS_INTERNAL ${P4FLAGS_INTERNAL} --no-bf-rt-schema)
   endif()
   if(p4rt)
-    set(output_files "${output_files}" "${CMAKE_CURRENT_BINARY_DIR}/${target_path}/p4info.pb.txt" )
-    set(rt_commands "${rt_commands}" "--p4runtime-files" "${target_path}/p4info.pb.txt")
-    set(depends_target "${depends_target}" "${CMAKE_CURRENT_BINARY_DIR}/${target_path}/p4info.pb.txt")
+    set(output_files "${output_files}" "${CMAKE_CURRENT_BINARY_DIR}/${target_path}/p4info.txtpb" )
+    set(rt_commands "${rt_commands}" "--p4runtime-files" "${target_path}/p4info.txtpb")
+    set(depends_target "${depends_target}" "${CMAKE_CURRENT_BINARY_DIR}/${target_path}/p4info.txtpb")
   endif()
 
   # compile the p4 program
