@@ -1,8 +1,10 @@
 """Utils for Barefoot SDE."""
 
-from re import match
 import os
+from distutils.sysconfig import get_python_lib
+from re import match
 from subprocess import CalledProcessError, check_output
+from typing import Literal
 
 BFSDE = ""
 BFSDE_INSTALL = ""
@@ -121,3 +123,48 @@ def get_bfsde_tofino_model():
 
     # Unexpected output
     raise RuntimeError(f"Unexpected output of tofino-model: {out_str}")
+
+
+def get_bfsde_python_path():
+    """Get python path of SDE.
+
+    Returns:
+        path(str): Path to python site-packages of SDE.
+
+    Raises:
+        FileNotFoundError: Install path of Barefoot SDE not found.
+
+    References:
+        - ${SDE}/run_p4_tests.sh
+    """
+    python_lib = get_python_lib(
+        prefix='', standard_lib=True, plat_specific=True)
+    return get_bfsde_install(python_lib, "site-packages")
+
+
+def get_bfsde_python_path_for_p4_test(arch: Literal["", "tofino", "tofino2", "tofino2m", "tofino3"] = ""):
+    """Get python path of SDE for p4 tests.
+
+    Args:
+        arch(str): Architecture of target program, use to retrieve generated PD files inside SDE,
+        could be "tofino", "tofino2", "tofino2m", "tofino3", or ""(default) indicating no PD inside SDE is needed.
+
+    Returns:
+        paths(list[str]): Python paths.
+
+    Raises:
+        FileNotFoundError: Install path of Barefoot SDE not found.
+
+    References:
+        - ${SDE}/run_p4_tests.sh
+    """
+
+    bfsde_python_path = get_bfsde_python_path()
+    python_paths = []
+    python_paths.append(os.path.join(bfsde_python_path, "tofino/bfrt_grpc"))
+    python_paths.append(bfsde_python_path)
+    python_paths.append(os.path.join(bfsde_python_path, "tofino"))
+    if arch:
+        python_paths.append(os.path.join(bfsde_python_path, f"{arch}pd"))
+    python_paths.append(os.path.join(bfsde_python_path, "p4testutils"))
+    return python_paths
