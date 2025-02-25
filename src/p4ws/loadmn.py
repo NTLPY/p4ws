@@ -8,10 +8,10 @@ from logging import _nameToLevel, basicConfig
 
 from mininet.cli import CLI
 from mininet.link import Intf, Link
-from mininet.log import LEVELS, OUTPUT, setLogLevel, info
+from mininet.log import LEVELS, OUTPUT, info, setLogLevel
 from mininet.moduledeps import pathCheck
 from mininet.net import Mininet
-from mininet.node import Host, Switch, Controller
+from mininet.node import Controller, Host, Switch
 
 from .mnhlp import JsonTopo, ParserError
 from .utils import get_type, get_type_name
@@ -335,18 +335,31 @@ def main_loadmn(args: argparse.Namespace):
 
         shell = os.environ.get("SHELL", "bash")
         args.shell_file.writelines([
-            f"#!{shell}\n", f"\n",
+            f"#!{shell}\n",
+            f"\n",
             f"# This file is created by mininet tool `loadmn` of P4 Workshop, do not modify it.\n",
+            f"\n",
+            f"function print_usage {{\n",
+            f"  echo \"Usage: $0 [switch_name|host_name]\"\n",
+            f"  echo \"Available nodes: " + ", ".join(node_names) + ".\"\n"
+            f"}}\n",
+            f"\n",
             f"if [ $# -ne 1 ]; then\n",
-            f"echo \"Usage: term [switch_name|host_name]\"\n",
-            f"echo \"Available nodes: " + ", ".join(node_names) +
-            ".\"\n", f"exit 1\n", f"fi\n", f"\n", f"case $1 in\n"
-        ] + [f"{host.name}) PID={host.pid};;\n" for host in net.hosts] + [
-            f"{switch.name}) PID={switch.pid};;\n" for switch in net.switches
-        ] + [
-            f"*)\n", f"    echo \"Usage: term [switch_name|host_name]\"\n",
-            f"    echo \"Available nodes: " + ", ".join(node_names) +
-            ".\"\n", f"    exit 1\n", f"esac\n", f"\n",
+            f"  print_usage\n",
+            f"  exit 1\n",
+            f"fi\n",
+            f"\n",
+            f"case $1 in\n"] + [
+            f"  {host.name}) PID={host.pid};;\n" for host in net.hosts] + [
+            f"  {switch.name}) PID={switch.pid};;\n" for switch in net.switches] + [
+            f"  ?)\n",
+            f"    print_usage\n",
+            f"    exit 0;;\n",
+            f"  *)\n",
+            f"    print_usage\n",
+            f"    exit 1;;\n",
+            f"esac\n",
+            f"\n",
             f"sudo -E env PATH={os.environ.get('PATH', '')} mnexec -a ${{PID}} {shell}"
         ])
         os.chmod(args.shell_file.fileno(), 0o775)
