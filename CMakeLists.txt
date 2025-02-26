@@ -24,7 +24,7 @@ else()
 endif()
 
 # Build distribution
-file(GLOB_RECURSE SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/p4ws/*")
+file(GLOB_RECURSE SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/p4ws/*.py")
 set(DIST_DIR "${CMAKE_BINARY_DIR}/dist")
 set(SDIST_FILE "${DIST_DIR}/${PROJECT_NAME}-${PACKAGE_VERSION}.tar.gz")
 set(WHEEL_FILE "${DIST_DIR}/${PROJECT_NAME}-${PACKAGE_VERSION}-py3-none-any.whl")
