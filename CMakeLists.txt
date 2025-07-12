@@ -23,6 +23,19 @@ else()
   message(STATUS "Package version: ${PACKAGE_VERSION}")
 endif()
 
+# Generate _version.py file
+set(VERSION_FILE "${CMAKE_SOURCE_DIR}/src/p4ws/_version.py")
+
+execute_process(
+  COMMAND ${Python3_EXECUTABLE} -c "with open('${VERSION_FILE}', 'w') as f: f.write('__version__ = \"${PACKAGE_VERSION}\"\\n')"
+  RESULT_VARIABLE RET
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+if (NOT ${RET} EQUAL 0)
+  message(FATAL_ERROR "Failed to generate _version.py file during configuration")
+endif()
+
 # Build distribution
 file(GLOB_RECURSE SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/p4ws/*.py")
 set(DIST_DIR "${CMAKE_BINARY_DIR}/dist")
@@ -34,7 +47,7 @@ add_custom_command(
   COMMAND ${Python3_EXECUTABLE} -m build --outdir ${CMAKE_BINARY_DIR}/dist
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   COMMENT "Building p4ws Python package"
-  DEPENDS ${SOURCE_FILES}
+  DEPENDS ${SOURCE_FILES} ${VERSION_FILE}
   BYPRODUCTS ${WHEEL_FILE}
   VERBATIM
 )
