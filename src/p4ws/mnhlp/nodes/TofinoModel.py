@@ -16,7 +16,7 @@ import socket
 import tempfile
 import threading
 from enum import Enum
-from subprocess import PIPE
+from subprocess import PIPE, Popen
 from typing import List, TextIO, Tuple, Union
 
 from mininet.link import Intf
@@ -97,6 +97,20 @@ class TofinoModel(Switch):
     sw_stderr : TextIO | int | None
         Standard error for model, str for a file, see Popen for more details.
     """
+
+    num_of_instances = 0
+    instances_started: list["TofinoModel"] = []
+    num_of_instances_shutdowned = 0
+    conf_file = None
+    port_file = None
+
+    cli_port = 8000
+
+    sw = None
+    _is_killed = False
+    _sw_daemon = None
+
+    sock = None
 
     def __init__(self, name,
                  p4_target_conf: str,
@@ -204,10 +218,10 @@ class TofinoModel(Switch):
         self.json_log_enable = bool(json_log_enable)
 
         # Output
-        self.sw_stdout = open(sw_stdout, "w") if isinstance(
-            sw_stdout, str) else sw_stdout
-        self.sw_stderr = open(sw_stderr, "w") if isinstance(
-            sw_stderr, str) else sw_stderr
+        self.sw_stdout = sw_stdout
+        self.sw_stderr = sw_stderr
+
+        TofinoModel.num_of_instances += 1
 
     @classmethod
     def setup(cls):
@@ -221,90 +235,170 @@ class TofinoModel(Switch):
             controllers: Not used.
         """
 
+        TofinoModel.instances_started.append(self)
+        if len(TofinoModel.instances_started) >= TofinoModel.num_of_instances:
+            TofinoModel.__real_start(self)
+
+    def stop(self):
+        """Shutdown the model."""
+
+        TofinoModel.num_of_instances_shutdowned += 1
+        if TofinoModel.num_of_instances_shutdowned == TofinoModel.num_of_instances:
+            TofinoModel.__real_shutdown()
+
+    @staticmethod
+    def __real_start(instance):
         # tofino-model args
         # executable
         args = [TofinoModel.tofino_model_exec]
         env = {"LD_LIBRARY_PATH": TofinoModel.ld_library_path}
 
-        args.extend(["--p4-target-config", self.p4_target_conf])
+        def check_only_one(property_name: str, fallback=None):
+            prop = fallback
+            for instance in TofinoModel.instances_started:
+                prop_ = getattr(instance, property_name)
+                if prop != fallback and prop_ != prop:
+                    raise NotImplementedError(
+                        f"Only one {property_name} is supported")
+
+                prop = prop_
+            return prop
+
+        conf_out = {"chip_list": [], "p4_devices": [], "switch_options": []}
+        for i, instance in enumerate(TofinoModel.instances_started):
+            conf = json.load(open(instance.p4_target_conf))
+
+            if len(conf["chip_list"]) != 1:
+                raise ValueError(
+                    f"Only one chip is supported, but got {len(conf['chip_list'])} chips in {instance.p4_target_conf}")
+            chip = conf["chip_list"][0]
+            chip["instance"] = i
+            conf_out["chip_list"].append(chip)
+
+            if len(conf["p4_devices"]) != 1:
+                raise ValueError(
+                    f"Only one P4 device is supported, but got {len(conf['p4_devices'])} devices in {instance.p4_target_conf}")
+            p4_device = conf["p4_devices"][0]
+            p4_device["device-id"] = i
+            conf_out["p4_devices"].append(p4_device)
+
+            if len(conf["switch_options"]) != 1:
+                raise ValueError(
+                    f"Only one switch options is supported, but got {len(conf['p4_devices'])} devices in {instance.p4_target_conf}")
+            switch_options = conf["switch_options"][0]
+            switch_options["device-id"] = i
+            conf_out["switch_options"].append(switch_options)
+        TofinoModel.conf_file = tempfile.NamedTemporaryFile(
+            "w", prefix="p4ws.mnhlp.nodes.TofinoModel.conf_file-", suffix=".json")
+        json.dump(conf_out, TofinoModel.conf_file)
+        TofinoModel.conf_file.flush()
+        args.extend(["--p4-target-config", TofinoModel.conf_file.name])
+        debug(f"conf_out {TofinoModel.conf_file.name}: ", conf_out)
+
+        # Number of devices
+        num_of_devices = TofinoModel.num_of_instances
+        args.extend(["--num-of-chips", str(num_of_devices)])
 
         # Ports
         ports_out = {"PortToVeth": []}
-        for i, intf in self.intfs.items():
-            i: int
-            intf: Intf
-            if intf.name == "lo":  # Loopback
-                continue
+        for i, instance in enumerate(TofinoModel.instances_started):
+            base = i * 512
 
-            dev_port = i - 1
-            veth1_id = dev_port * 2
-            veth2_id = veth1_id + 1
+            for i, intf in instance.intfs.items():
+                assert isinstance(i, int) and isinstance(intf, Intf)
 
-            intf.rename(f"veth{veth1_id}")
-            ports_out["PortToVeth"].append({"device_port": dev_port,
-                                            "veth1": veth1_id,
-                                            "veth2": veth2_id})
-        self.port_file = tempfile.NamedTemporaryFile(
-            "w", prefix="ports-", suffix=".json")
-        json.dump(ports_out, self.port_file)
-        self.port_file.flush()
-        args.extend(["-f", self.port_file.name])
+                if intf.name == "lo":  # Loopback
+                    continue
+
+                dev_port = base + i - 1
+                veth1_id = base + dev_port * 2
+                veth2_id = veth1_id + 1
+
+                intf.rename(f"veth{veth1_id}")
+                ports_out["PortToVeth"].append({"device_port": dev_port,
+                                                "veth1": veth1_id,
+                                                "veth2": veth2_id})
+        TofinoModel.port_file = tempfile.NamedTemporaryFile(
+            "w", prefix="p4ws.mnhlp.nodes.TofinoModel.port_file-", suffix=".json")
+        json.dump(ports_out, TofinoModel.port_file)
+        TofinoModel.port_file.flush()
+        args.extend(["-f", TofinoModel.port_file.name])
+        debug(f"ports_out {TofinoModel.port_file.name}: ", ports_out)
 
         # CLI
-        args.extend(["--cli-port", str(self.cli_port)])
-        if self.cli_credentials:
-            self.cli_credentials_file = tempfile.NamedTemporaryFile(
+        TofinoModel.cli_port = check_only_one("cli_port", 8000)
+        assert isinstance(TofinoModel.cli_port, int)
+        args.extend(["--cli-port", str(TofinoModel.cli_port)])
+        cli_credentials = check_only_one("cli_credentials")
+        if cli_credentials:
+            cli_credentials_file = tempfile.NamedTemporaryFile(
                 "w", prefix="cli-credentials-", suffix=".json")
-            username, password = self.cli_credentials
+            username, password = cli_credentials
             if ":" in username:
                 raise ValueError(f"Invalid username: {username}")
-            self.cli_credentials_file.write(f"{username}:{password}")
-            self.cli_credentials_file.flush()
-            args.extend(["--cli-credentials", self.cli_credentials_file.name])
+            cli_credentials_file.write(f"{username}:{password}")
+            cli_credentials_file.flush()
+            args.extend(["--cli-credentials", cli_credentials_file.name])
 
         # PCIe
-        args.extend(["-t", f"{self.dru_sim_tcp_port_base}"])
+        dru_sim_tcp_port_base = check_only_one("dru_sim_tcp_port_base", 8001)
+        args.extend(["-t", str(dru_sim_tcp_port_base)])
 
         # Functional
-        if self.time_disable:
+        time_disable = check_only_one("time_disable", False)
+        if time_disable:
             args.append("--time-disable")
-        if self.port_monitor:
+        port_monitor = check_only_one("port_monitor", False)
+        if port_monitor:
             args.append("--port-monitor")
-        if self.dod_test_model:
+        dod_test_model = check_only_one("dod_test_model", False)
+        if dod_test_model:
             args.append("--dod-test-mode")
 
         # Logging
-        if self.log_dir is not None:
-            args.extend(["--log-dir", self.log_dir])
-            if self.json_log_enable:
+        log_dir = check_only_one("log_dir")
+        if log_dir is not None:
+            args.extend(["--log-dir", log_dir])
+            json_log_enable = check_only_one("json_log_enable", False)
+            if json_log_enable:
                 args.extend(["--json-logs-enable"])
         else:
             args.extend(["--logs-disable"])
 
-        self.sw = self.popen(
-            args, env=env, stdout=self.sw_stdout, stderr=self.sw_stderr)
+        sw_stdout, sw_stderr = check_only_one(
+            "sw_stdout", PIPE), check_only_one("sw_stderr", PIPE)
+        sw_stdout = open(sw_stdout, "w") if isinstance(
+            sw_stdout, str) else sw_stdout
+        sw_stderr = open(sw_stderr, "w") if isinstance(
+            sw_stderr, str) else sw_stderr
 
-        debug(f"{self.name}({type(self).__name__}) PID is {self.sw.pid}.\n")
+        TofinoModel.sw = instance.popen(
+            args, env=env, stdout=sw_stdout, stderr=sw_stderr)
+
+        debug(f"TofinoModel PID is {TofinoModel.sw.pid}.\n")
 
         # check whether open
-        self._is_killed = False
-        self._sw_daemon = threading.Thread(
-            target=self.__sw_daemon_proc, name=f"{self}.__switch_daemon", args=(), daemon=True)
-        self._sw_daemon.start()
+        TofinoModel._is_killed = False
+        TofinoModel._sw_daemon = threading.Thread(
+            target=TofinoModel.__sw_daemon_proc, name=f"TofinoModel.__switch_daemon", args=(), daemon=True)
+        TofinoModel._sw_daemon.start()
 
-        if not self.wait_for_server_start():
+        if not TofinoModel.wait_for_server_start():
             error(
-                f"{self.name} not started successfully.\n")
+                f"TofinoModel not started successfully.\n")
             exit(1)
 
-    def stop(self):
-        """Shutdown the model."""
-        self._is_killed = True
-        self.sw.kill()
-        self.sw.wait()
-        self._sw_daemon.join()
+    @staticmethod
+    def __real_shutdown():
+        assert isinstance(TofinoModel.sw, Popen) and isinstance(
+            TofinoModel._sw_daemon, threading.Thread)
+        TofinoModel._is_killed = True
+        TofinoModel.sw.kill()
+        TofinoModel.sw.wait()
+        TofinoModel._sw_daemon.join()
 
-    def __do_switch_shutdown(self, return_code: int, is_killed: bool):
+    @staticmethod
+    def __do_switch_shutdown(return_code: int, is_killed: bool):
         """Event: switch shutdown.
 
         Parameters
@@ -315,20 +409,23 @@ class TofinoModel(Switch):
             True if the switch is shutdown by calling `stop` method.
         """
         if is_killed:
-            info(f"{self.name} shutdowned.\n")
+            info(f"TofinoModel shutdowned.\n")
         else:
             error(
-                f"{self.name} shutdowned unexpectedly, return code {return_code}.\n")
+                f"TofinoModel shutdowned unexpectedly, return code {return_code}.\n")
 
-    def __sw_daemon_proc(self):
+    @staticmethod
+    def __sw_daemon_proc():
         """Switch daemon to check it status."""
-        self.sw.wait()
-        poll = self.sw.poll()
+        assert isinstance(TofinoModel.sw, Popen)
+        TofinoModel.sw.wait()
+        poll = TofinoModel.sw.poll()
         assert poll is not None
-        self.__do_switch_shutdown(
-            poll, self._is_killed)
+        TofinoModel.__do_switch_shutdown(
+            poll, TofinoModel._is_killed)
 
-    def wait_for_server_start(self):
+    @staticmethod
+    def wait_for_server_start():
         """Waiting until model shell CLI available.
 
         Notes
@@ -345,12 +442,13 @@ class TofinoModel(Switch):
         available : bool
             True if CLI available, or False if model shutdown.
         """
+        assert isinstance(TofinoModel.sw, Popen)
         while True:
-            if self.sw.poll() is not None:
+            if TofinoModel.sw.poll() is not None:
                 return False
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.settimeout(0.5)
-            result = sock.connect_ex(("localhost", self.cli_port))
+            result = sock.connect_ex(("localhost", TofinoModel.cli_port))
             if result == 0:
-                self.sock = sock
+                TofinoModel.sock = sock
                 return True
