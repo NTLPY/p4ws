@@ -3,6 +3,7 @@
 import io
 import json
 import os
+import re
 import tarfile
 from distutils.sysconfig import get_python_lib
 from re import match
@@ -61,6 +62,55 @@ def get_bfsde_install(*suffix: str):
         raise FileNotFoundError("Install path of Barefoot SDE not found")
 
     return os.path.join(BFSDE_INSTALL, *suffix)
+
+
+def get_bfsde_version(component: str = "bf-sde"):
+    """Get version of Barefoot SDE.
+
+    Arguments:
+        component (str): Component of Barefoot SDE default is "bf-sde", could be:
+            - "bf-sde"
+            - "bf-drivers"
+            - "bf-utils"
+            - "p4-compilers"
+            - "target-utils"
+            - "target-syslibs"
+            - "tofino-model"
+            - "p4-examples"
+            - "ptf-modules"
+            - "bf-diags"
+            - "switch-p4-16"
+            - "p4i"
+            - "p4o"
+
+    Returns:
+        A str of version of Barefoot SDE or its component.
+
+    Raises:
+        FileNotFoundError: Path of Barefoot SDE or manifest file not found.
+        KeyError: Component not found in Barefoot SDE manifest file.
+        See open() for more details on exceptions raised by it.
+    """
+
+    bfsde = get_bfsde()
+    for file in os.listdir(bfsde):
+        matches = re.match(rf"bf-sde-([0-9]+\.[0-9]+\.[0-9]+)\.manifest", file)
+        if matches is not None:
+            bfsde_version = matches.group(1)
+            bfsde_manifest = os.path.join(bfsde, file)
+            break
+    if 'bfsde_version' not in locals():
+        raise FileNotFoundError("Manifest file not found in Barefoot SDE")
+
+    if component == "bf-sde":
+        return bfsde_version
+
+    for line in open(bfsde_manifest, "r"):
+        matches = re.match(
+            rf"{component}\s*:\s*([0-9]+\.[0-9]+\.[0-9]+)", line)
+        if matches is not None:
+            return matches.group(1)
+    raise KeyError(component)
 
 
 def get_bfsde_ld_library_path():
@@ -171,6 +221,39 @@ def get_bfsde_python_path_for_p4_test(arch: Literal["", "tofino", "tofino2", "to
         python_paths.append(os.path.join(bfsde_python_path, f"{arch}pd"))
     python_paths.append(os.path.join(bfsde_python_path, "p4testutils"))
     return python_paths
+
+
+def bfsde_patch():
+    """Patch Barefoot SDE.
+
+    Returns:
+        None
+
+    Raises:
+        FileNotFoundError: Install path of Barefoot SDE not found.
+        See get_bfsde_version() for more details on exceptions raised by it.
+    """
+
+    bfsde_install = get_bfsde_install()
+    bfsde_version = get_bfsde_version()
+    bfsde_driver_version = get_bfsde_version("bf-drivers")
+    bfsde_python_path = get_bfsde_python_path()
+    patch_path = os.path.join(os.path.dirname(__file__), "patches", "bfsde")
+
+    # Patch bfrtcli.py
+    bfrtcli_path = os.path.abspath(os.path.join(
+        bfsde_python_path, "..", "bfrtcli.py"))
+    if bfsde_driver_version == "9.13.3":
+        patch_file = os.path.join(patch_path, "bfrtcli-9.13.3.py.diff")
+        if os.path.exists(patch_file):
+            print(f">>> Command: patch -p0 -N {bfrtcli_path} -i {patch_file}")
+            try:
+                check_output(["patch", "-p0", "-N", bfrtcli_path,
+                             "-i", os.path.abspath(patch_file)])
+                print(f">>> Patched {bfrtcli_path} with {patch_file}")
+            except CalledProcessError as e:
+                print(
+                    f"Failed to patch {bfrtcli_path} with {patch_file}:\n{e.output.decode('utf-8')}")
 
 
 def bfsde_filter_target_config(obj: dict, conf_path: str, relative: bool = True):

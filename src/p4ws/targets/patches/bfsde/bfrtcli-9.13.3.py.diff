@@ -1,0 +1,56 @@
+--- bfrtcli.py.origin	2025-07-12 15:42:41.560211069 +0000
++++ bfrtcli.py	2025-07-12 16:08:28.013835262 +0000
+@@ -2341,6 +2341,26 @@
+ Register a DVM add_device callback, that reloads bfrt python session.
+ """
+ def _register_reload_callback(bf_rt_drv_hdl):
++    if isinstance(bf_rt_drv_hdl, dict):
++        # More than one device is present, so we need to register all of them
++        stss = {}
++        for dev_id, hdl in bf_rt_drv_hdl.items():
++            dev_node = bfrt._get_children()["dev_"+str(dev_id)]
++            sts = dev_node._cintf.get_driver().bf_drv_register(c_char_p(b"bfrtcli.py"), byref(hdl))
++            if not sts == 0:
++                print("bf_drv_register failed for device {} [{}]".format(dev_id, dev_node._cintf.err_str(sts)))
++            stss[dev_id] = sts
++
++            dev_node.bf_drv_register_cb_type = device_add_fn
++
++            dev_node.bf_drv_client_callbacks = BfDrvClientCallbacks()
++            dev_node.bf_drv_client_callbacks.device_add = _wrap_bfrt_reload_callback(dev_node)
++
++            sts = dev_node._cintf.get_driver().bf_drv_client_register_callbacks(hdl, byref(dev_node.bf_drv_client_callbacks), c_int(0)) # 0 - BF_CLIENT_PRIO_0
++            if not sts == 0:
++                print("bf_drv_client_register_callbacks failed for device {} [{}]".format(dev_id, dev_node._cintf.err_str(sts)))
++        return stss
++
+     sts = bfrt._cintf.get_driver().bf_drv_register(c_char_p(b"bfrtcli.py"), byref(bf_rt_drv_hdl))
+     if not sts == 0:
+         print("bf_drv_register failed [{}]".format(bfrt._cintf.err_str(sts)))
+@@ -2360,6 +2380,17 @@
+ Deregister a DVM add_device callback.
+ """
+ def _deregister_reload_callback(bf_rt_drv_hdl):
++    if isinstance(bf_rt_drv_hdl, dict):
++        # More than one device is present, so we need to deregister all of them
++        stss = {}
++        for dev_id, hdr in bf_rt_drv_hdl.items():
++            dev_node = bfrt._get_children()["dev_"+str(dev_id)]
++            sts = dev_node._cintf.get_driver().bf_drv_deregister(hdr)
++            if not sts == 0:
++                print("bf_drv_deregister failed for device {} [{}]".format(dev_id, bfrt._cintf.err_str(sts)))
++            stss[dev_id] = sts
++        return stss
++
+     sts = bfrt._cintf.get_driver().bf_drv_deregister(bf_rt_drv_hdl)
+     if not sts == 0:
+         print("bf_drv_deregister failed [{}]".format(bfrt._cintf.err_str(sts)))
+@@ -2504,7 +2535,7 @@
+         return sts
+ 
+     global bfrt
+-    bf_rt_drv_hdl = c_int()
++    bf_rt_drv_hdl = c_int() if len(dev_id_list) <= 1 else dict((dev_id, c_int()) for dev_id in dev_id_list)
+     _register_reload_callback(bf_rt_drv_hdl)
+ 
+     # Workaround to prevent Python from installing its SIGWINCH signal handler
