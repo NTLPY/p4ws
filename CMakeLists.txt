@@ -54,6 +54,15 @@ add_custom_command(
 add_custom_target(build ALL DEPENDS ${WHEEL_FILE})
 
 ###############################################################################
+# p4ws P4 Include
+###############################################################################
+
+install(DIRECTORY "${CMAKE_SOURCE_DIR}/p4src/" DESTINATION "${CMAKE_INSTALL_PREFIX}/share/p4ws/p4include"
+  FILES_MATCHING
+  PATTERN "*.p4"
+)
+
+###############################################################################
 # p4ws CMake tools
 ###############################################################################
 

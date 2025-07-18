@@ -98,6 +98,9 @@ function(P4_CHECK_P4FLAGS)
   separate_arguments(COMPUTED_P4PPFLAGS UNIX_COMMAND ${P4PPFLAGS})
   separate_arguments(COMPUTED_P4FLAGS UNIX_COMMAND ${P4FLAGS})
 
+  # Include files from p4ws
+  list(APPEND COMPUTED_P4PPFLAGS "-I/usr/share/p4ws/p4include" "-I/usr/local/share/p4ws/p4include")
+
   message("P4 Preprocessor Flags: ${COLOR_INFO}${COMPUTED_P4PPFLAGS}${COLOR_RST}")
   message("P4 Flags: ${COLOR_INFO}${COMPUTED_P4FLAGS}${COLOR_RST}")
 
