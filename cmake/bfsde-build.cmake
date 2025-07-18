@@ -156,6 +156,8 @@ function(BFSDE_ADD_P4_PROGRAM t p4target p4src p4lang p4arch bfrt p4rt withpd wi
   bfsde_p4_check_p4archtarget("${p4lang}" "${p4arch}" "${p4target}")
   bfsde_p4_check_rt("${bfrt}" "${p4rt}" "${withpd}" "${withthrift}")
   p4_check_p4flags()
+  list(JOIN COMPUTED_P4PPFLAGS " " COMPUTED_P4PPFLAGS)
+  list(JOIN COMPUTED_P4FLAGS " " COMPUTED_P4FLAGS)
   bfsde_p4_check_pdflags()
   if (("${p4target}" STREQUAL "tofino2m") OR
       ("${p4target}" STREQUAL "tofino2u") OR

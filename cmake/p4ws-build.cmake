@@ -50,7 +50,7 @@ include(utils)
 
 function(P4_TARGET_INCLUDE_DIRECTORIES t)
   get_target_property(EXISTING_P4_INCLUDE_DIRECTORIES "${t}" P4_INCLUDE_DIRECTORIES)
-  
+
   set(ABSOLUTE_INCLUDE_DIRECTORIES)
   # Convert to absolute path
   foreach(dir ${ARGN})
@@ -95,14 +95,14 @@ function(P4_CHECK_P4LANG p4lang)
 endfunction()
 
 function(P4_CHECK_P4FLAGS)
-  separate_arguments(COMPUTED_P4FLAGS UNIX_COMMAND ${P4FLAGS})
   separate_arguments(COMPUTED_P4PPFLAGS UNIX_COMMAND ${P4PPFLAGS})
-  if(P4FLAGS)
-    message("P4 Flags: ${COLOR_INFO}${P4FLAGS}${COLOR_RST}")
-  endif()
-  if(P4PPFLAGS)
-    message("P4 Preprocessor Flags: ${COLOR_INFO}${P4PPFLAGS}${COLOR_RST}")
-  endif()
+  separate_arguments(COMPUTED_P4FLAGS UNIX_COMMAND ${P4FLAGS})
+
+  message("P4 Preprocessor Flags: ${COLOR_INFO}${COMPUTED_P4PPFLAGS}${COLOR_RST}")
+  message("P4 Flags: ${COLOR_INFO}${COMPUTED_P4FLAGS}${COLOR_RST}")
+
+  set(COMPUTED_P4PPFLAGS "${COMPUTED_P4PPFLAGS}" PARENT_SCOPE)
+  set(COMPUTED_P4FLAGS "${COMPUTED_P4FLAGS}" PARENT_SCOPE)
 endfunction()
 
 function(ADD_P4_PROGRAM t p4target p4src p4lang p4arch apis)
