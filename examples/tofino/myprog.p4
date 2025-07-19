@@ -1,21 +1,20 @@
-/*******************************************************************************
- *  INTEL CONFIDENTIAL
+/**
+ * Copyright 2024 Intel Corporation
  *
- *  Copyright (c) 2021 Intel Corporation
- *  All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  This software and the related documents are Intel copyrighted materials,
- *  and your use of them is governed by the express license under which they
- *  were provided to you ("License"). Unless the License provides otherwise,
- *  you may not use, modify, copy, publish, distribute, disclose or transmit
- *  this software or the related documents without Intel's prior written
- *  permission.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *  This software and the related documents are provided as is, with no express
- *  or implied warranties, other than those that are expressly stated in the
- *  License.
- ******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Author: NTLPY <59137305+NTLPY@users.noreply.github.com>
+ */
 
 #include <core.p4>
 #if __TARGET_TOFINO__ == 3
@@ -26,9 +25,14 @@
 #include <tna.p4>
 #endif
 
-#include "common/headers.p4"
-#include "common/util.p4"
+#include <utils.p4>
+#include <ether.p4>
+#include <ip.p4>
 
+struct header_t {
+    eth_h eth;
+    ip_h ip;
+}
 
 struct metadata_t {}
 
@@ -49,12 +53,12 @@ parser SwitchIngressParser(
     }
 
     state parse_ethernet {
-        pkt.extract(hdr.ethernet);
+        pkt.extract(hdr.eth);
         transition parse_ipv4;
     }
 
     state parse_ipv4 {
-        pkt.extract(hdr.ipv4);
+        pkt.extract(hdr.ip);
         transition accept;
     }
 }
@@ -71,18 +75,18 @@ control SwitchIngressDeparser(
     Checksum() ipv4_checksum;
 
     apply {
-        hdr.ipv4.hdr_checksum = ipv4_checksum.update({
-            hdr.ipv4.version,
-            hdr.ipv4.ihl,
-            hdr.ipv4.diffserv,
-            hdr.ipv4.total_len,
-            hdr.ipv4.identification,
-            hdr.ipv4.flags,
-            hdr.ipv4.frag_offset,
-            hdr.ipv4.ttl,
-            hdr.ipv4.protocol,
-            hdr.ipv4.src_addr,
-            hdr.ipv4.dst_addr});
+        hdr.ip.check = ipv4_checksum.update({
+            hdr.ip.version,
+            hdr.ip.ihl,
+            hdr.ip.tos,
+            hdr.ip.tot_len,
+            hdr.ip.id,
+            hdr.ip.flags,
+            hdr.ip.frag_off,
+            hdr.ip.ttl,
+            hdr.ip.protocol,
+            hdr.ip.saddr,
+            hdr.ip.daddr});
 
          pkt.emit(hdr);
     }
@@ -111,7 +115,7 @@ control SwitchIngress(
 
     table forward {
         key = {
-            hdr.ethernet.dst_addr : exact;
+            hdr.eth.dest : exact;
         }
 
         actions = {
@@ -125,17 +129,17 @@ control SwitchIngress(
 
     action route(mac_addr_t srcMac, mac_addr_t dstMac, PortId_t dst_port) {
         ig_tm_md.ucast_egress_port = dst_port;
-        hdr.ethernet.dst_addr = dstMac;
-        hdr.ethernet.src_addr = srcMac;
+        hdr.eth.dest = dstMac;
+        hdr.eth.source = srcMac;
         cntr.count();
         color = (bit<2>) meter.execute();
         ig_dprsr_md.drop_ctl = 0;
     }
 
-    action nat(ipv4_addr_t srcAddr, ipv4_addr_t dstAddr, PortId_t dst_port) {
+    action nat(ip_addr_t srcAddr, ip_addr_t dstAddr, PortId_t dst_port) {
         ig_tm_md.ucast_egress_port = dst_port;
-        hdr.ipv4.dst_addr = dstAddr;
-        hdr.ipv4.src_addr = srcAddr;
+        hdr.ip.daddr = dstAddr;
+        hdr.ip.saddr = srcAddr;
         cntr.count();
         color = (bit<2>) meter.execute();
         ig_dprsr_md.drop_ctl = 0;
@@ -145,7 +149,7 @@ control SwitchIngress(
     table ipRoute {
         key = {
             vrf : exact;
-            hdr.ipv4.dst_addr : exact;
+            hdr.ip.daddr : exact;
         }
 
         actions = {
@@ -162,7 +166,7 @@ control SwitchIngress(
 
     table forward_timeout {
         key = {
-            hdr.ethernet.dst_addr : exact;
+            hdr.eth.dest : exact;
         }
 
         actions = {

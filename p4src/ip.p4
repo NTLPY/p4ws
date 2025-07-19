@@ -1,0 +1,56 @@
+/**
+ * INET Definitions
+ *
+ * Reference:
+ * - linux/include/uapi/linux/ip.h
+ * - linux/include/uapi/linux/in.h
+ *
+ * Copyright 2025 NTLPY
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Author: NTLPY <59137305+NTLPY@users.noreply.github.com>
+ */
+
+#ifndef IP_P4
+#define IP_P4
+
+typedef bit<32> ip_addr_t;
+typedef bit<16> ip_protocol_t;
+
+/* Standard well-defined IP protocols.  */
+enum ip_protocol_t ip_protocol_e {
+    IPPROTO_ICMP    = 1,    // Internet Control Message Protocol
+    IPPROTO_IGMP    = 2,    // Internet Group Management Protocol
+    IPPROTO_TCP     = 6,    // Transmission Control Protocol
+    IPPROTO_UDP     = 17,   // User Datagram Protocol
+    IPPROTO_IPV6    = 41,   // IPv6 header
+    IPPROTO_RAW     = 255,  // Raw IP packet
+};
+
+header ip_h {
+    bit<4>          version;
+    bit<4>          ihl;
+    bit<8>          tos;
+    bit<16>         tot_len;
+    bit<16>         id;
+    bit<3>          flags;
+    bit<13>         frag_off;
+    bit<8>          ttl;
+    ip_protocol_t   protocol;
+    bit<16>         check;
+    ip_addr_t       saddr;
+    ip_addr_t       daddr;
+}
+
+#endif // IP_P4
