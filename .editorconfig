@@ -31,6 +31,10 @@ indent_size = 4
 indent_style = space
 indent_size = 4
 
+[*.p4]
+indent_style = space
+indent_size = 4
+
 [{CMakeLists.txt,*.cmake}]
 indent_style = space
 indent_size = 2
