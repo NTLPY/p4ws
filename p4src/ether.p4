@@ -25,14 +25,15 @@
 #define ETHER_P4
 
 typedef bit<48> mac_addr_t;
-typedef bit<16> ether_type_t;
 
-const ether_type_t ETHER_TYPE_IP        = 0x0800;
-const ether_type_t ETHER_TYPE_ARP       = 0x0806;
-const ether_type_t ETHER_TYPE_IPV6      = 0x86DD;
-const ether_type_t ETHER_TYPE_VLAN      = 0x8100;
-const ether_type_t ETHER_TYPE_MPLS_UC   = 0x8847;
-const ether_type_t ETHER_TYPE_MPLS_MC   = 0x8848;
+enum bit<16> ether_type_t {
+    IP      = 0x0800,   // Internet Protocol v4
+    ARP     = 0x0806,   // Address Resolution Protocol
+    IPV6    = 0x86DD,   // Internet Protocol v6
+    VLAN    = 0x8100,   // IEEE 802.1Q VLAN tagging
+    MPLS_UC = 0x8847,   // MPLS unicast
+    MPLS_MC = 0x8848,   // MPLS multicast
+};
 
 header eth_h {
     mac_addr_t      dest;

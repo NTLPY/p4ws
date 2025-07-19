@@ -26,15 +26,17 @@
 #define IP_P4
 
 typedef bit<32> ip_addr_t;
-typedef bit<8> ip_protocol_t;
 
 /* Standard well-defined IP protocols.  */
-const ip_protocol_t IPPROTO_ICMP    = 1;    // Internet Control Message Protocol
-const ip_protocol_t IPPROTO_IGMP    = 2;    // Internet Group Management Protocol
-const ip_protocol_t IPPROTO_TCP     = 6;    // Transmission Control Protocol
-const ip_protocol_t IPPROTO_UDP     = 17;   // User Datagram Protocol
-const ip_protocol_t IPPROTO_IPV6    = 41;   // IPv6 header
-const ip_protocol_t IPPROTO_RAW     = 255;  // Raw IP packet
+enum bit<8> ip_protocol_t {
+    IP      = 0,    // Dummy protocol for TCP
+    ICMP    = 1,    // Internet Control Message Protocol
+    IGMP    = 2,    // Internet Group Management Protocol
+    TCP     = 6,    // Transmission Control Protocol
+    UDP     = 17,   // User Datagram Protocol
+    IPV6    = 41,   // IPv6 header
+    RAW     = 255,  // Raw IP packet
+}
 
 header ip_h {
     bit<4>          version;
