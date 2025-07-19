@@ -29,14 +29,12 @@ typedef bit<32> ip_addr_t;
 typedef bit<8> ip_protocol_t;
 
 /* Standard well-defined IP protocols.  */
-enum ip_protocol_t ip_protocol_e {
-    IPPROTO_ICMP    = 1,    // Internet Control Message Protocol
-    IPPROTO_IGMP    = 2,    // Internet Group Management Protocol
-    IPPROTO_TCP     = 6,    // Transmission Control Protocol
-    IPPROTO_UDP     = 17,   // User Datagram Protocol
-    IPPROTO_IPV6    = 41,   // IPv6 header
-    IPPROTO_RAW     = 255,  // Raw IP packet
-};
+const ip_protocol_t IPPROTO_ICMP    = 1;    // Internet Control Message Protocol
+const ip_protocol_t IPPROTO_IGMP    = 2;    // Internet Group Management Protocol
+const ip_protocol_t IPPROTO_TCP     = 6;    // Transmission Control Protocol
+const ip_protocol_t IPPROTO_UDP     = 17;   // User Datagram Protocol
+const ip_protocol_t IPPROTO_IPV6    = 41;   // IPv6 header
+const ip_protocol_t IPPROTO_RAW     = 255;  // Raw IP packet
 
 header ip_h {
     bit<4>          version;

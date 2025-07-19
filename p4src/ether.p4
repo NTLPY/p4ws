@@ -27,19 +27,17 @@
 typedef bit<48> mac_addr_t;
 typedef bit<16> ether_type_t;
 
-enum ether_type_t ether_type_e {
-    ETHER_TYPE_IP       = 0x0800,
-    ETHER_TYPE_ARP      = 0x0806,
-    ETHER_TYPE_IPV6     = 0x86DD,
-    ETHER_TYPE_VLAN     = 0x8100,
-    ETHER_TYPE_MPLS_UC  = 0x8847,
-    ETHER_TYPE_MPLS_MC  = 0x8848,
-}
+const ether_type_t ETHER_TYPE_IP        = 0x0800;
+const ether_type_t ETHER_TYPE_ARP       = 0x0806;
+const ether_type_t ETHER_TYPE_IPV6      = 0x86DD;
+const ether_type_t ETHER_TYPE_VLAN      = 0x8100;
+const ether_type_t ETHER_TYPE_MPLS_UC   = 0x8847;
+const ether_type_t ETHER_TYPE_MPLS_MC   = 0x8848;
 
 header eth_h {
     mac_addr_t      dest;
     mac_addr_t      source;
-    ether_type_e    proto;
+    ether_type_t    proto;
 }
 
 #endif // ETHER_P4
