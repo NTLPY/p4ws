@@ -25,8 +25,8 @@
 #ifndef INFINIBAND_ALL_P4
 #define INFINIBAND_ALL_P4
 
-#include <infiniband/ib-base.p4>
-#include <infiniband/ib-transport.p4>
-#include <infiniband/ib-parser.p4>
+#include <infiniband/base.p4>
+#include <infiniband/transport.p4>
+#include <infiniband/parser.p4>
 
 #endif // INFINIBAND_ALL_P4
