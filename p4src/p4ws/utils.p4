@@ -65,20 +65,8 @@ parser TofinoEgressParser(
  * All egress process will be skipped.
  */
 control BypassEgress(inout ingress_intrinsic_metadata_for_tm_t ig_tm_md) {
-
-    action set_bypass_egress() {
-        ig_tm_md.bypass_egress = 1w1;
-    }
-
-    table bypass_egress {
-        actions = {
-            set_bypass_egress();
-        }
-        const default_action = set_bypass_egress;
-    }
-
     apply {
-        bypass_egress.apply();
+        ig_tm_md.bypass_egress = 1w1;
     }
 }
 
