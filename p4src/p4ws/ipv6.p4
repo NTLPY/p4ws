@@ -1,8 +1,9 @@
 /**
- * VLAN Definitions
+ * INET6 Definitions
  *
  * Reference:
- * - linux/include/linux/if_vlan.h
+ * - linux/include/uapi/linux/ipv6.h
+ * - linux/include/uapi/linux/in6.h
  *
  * Copyright 2025 NTLPY
  *
@@ -21,18 +22,22 @@
  * Author: NTLPY <59137305+NTLPY@users.noreply.github.com>
  */
 
-#ifndef VLAN_P4
-#define VLAN_P4
+#ifndef P4WS_IPV6_P4
+#define P4WS_IPV6_P4
 
-#include <ether.p4>
+#include <p4ws/ip.p4>
 
-typedef bit<12> vlan_id_t;
+typedef bit<128> ipv6_addr_t;
 
-header vlan_h {
-    bit<3>          pcp;
-    bit<1>          cfi;
-    vlan_id_t       vid;
-    ether_type_t    encap_proto;
+header ipv6_h {
+    bit<4>      version;
+    bit<8>      traffic_class;
+    bit<20>     flow_label;
+    bit<16>     payload_len;
+    bit<8>      nexthdr;
+    bit<8>      hop_limit;
+    ipv6_addr_t saddr;
+    ipv6_addr_t daddr;
 }
 
-#endif // VLAN_P4
+#endif // P4WS_IPV6_P4

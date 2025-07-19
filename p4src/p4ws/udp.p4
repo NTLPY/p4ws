@@ -1,5 +1,9 @@
 /**
- * Compiler Utilities
+ * UDP Definitions
+ *
+ * Reference:
+ * - RFC 768
+ * - linux/include/uapi/linux/udp.h
  *
  * Copyright 2025 NTLPY
  *
@@ -18,24 +22,14 @@
  * Author: NTLPY <59137305+NTLPY@users.noreply.github.com>
  */
 
-#ifndef COMPILER_P4
-#define COMPILER_P4
+#ifndef P4WS_UDP_P4
+#define P4WS_UDP_P4
 
-/**
- * Some P4 compilers do not support header unions.
- * This is a workaround to allow cross-compiler compatibility.
- * It replaces `header_union` with `struct` if header unions are unsupported.
- */
-#ifdef P4WS_ALLOW_HEADER_UNION_CROSS_COMPILER
+header udp_h {
+    bit<16> source;
+    bit<16> dest;
+    bit<16> len;
+    bit<16> check;
+}
 
-#if (defined __TARGET_TOFINO__ && (__p4c_major__ < 9 || (__p4c_major__ == 9 && __p4c_minor__ < 13) || (__p4c_major__ == 9 && __p4c_minor__ == 13 && __p4c_patchlevel__ <= 3)))
-#define HEADER_UNION_UNSUPPORTED
-#endif
-
-#ifdef HEADER_UNION_UNSUPPORTED
-#define header_union struct
-#endif
-
-#endif
-
-#endif // COMPILER_P4
+#endif // P4WS_UDP_P4

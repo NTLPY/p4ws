@@ -21,8 +21,8 @@
  * Author: NTLPY <59137305+NTLPY@users.noreply.github.com>
  */
 
-#ifndef ETHER_P4
-#define ETHER_P4
+#ifndef P4WS_ETHER_P4
+#define P4WS_ETHER_P4
 
 typedef bit<48> mac_addr_t;
 
@@ -41,4 +41,4 @@ header eth_h {
     ether_type_t    proto;
 }
 
-#endif // ETHER_P4
+#endif // P4WS_ETHER_P4

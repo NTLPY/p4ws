@@ -18,8 +18,8 @@
  * Author: NTLPY <59137305+NTLPY@users.noreply.github.com>
  */
 
-#ifndef UTILS_P4
-#define UTILS_P4
+#ifndef P4WS_UTILS_P4
+#define P4WS_UTILS_P4
 
 struct empty_header_t {}
 
@@ -125,4 +125,4 @@ control EmptyEgress(
     apply {}
 }
 
-#endif // UTILS_P4
+#endif // P4WS_UTILS_P4

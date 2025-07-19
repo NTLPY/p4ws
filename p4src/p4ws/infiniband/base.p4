@@ -1,5 +1,5 @@
 /**
- * InfiniBand Parsers
+ * InfiniBand Definitions
  *
  * Reference:
  * - InfiniBand Architecture Specification Volume 1, Release 1.4
@@ -22,40 +22,15 @@
  * Author: NTLPY <59137305+NTLPY@users.noreply.github.com>
  */
 
-#ifndef INFINIBAND_PARSER_P4
-#define INFINIBAND_PARSER_P4
+#ifndef P4WS_INFINIBAND_BASE_P4
+#define P4WS_INFINIBAND_BASE_P4
 
-#include <compiler.p4>
-#include <infiniband/transport.p4>
+//!< 4.1.3 Local Identifiers (C4-5)
+typedef bit<16> ib_lid_t;
+//!< 4.1.1 Global Identifiers (C4-3)
+typedef bit<128> ib_gid_t;
 
-header_union ib_ext_h {
-    ib_deth_h deth;
-}
+//!< UDP Port of RoCEv2
+const bit<16> ROCE_V2_UDP_DPORT = 4791;
 
-struct ib_hdr_t {
-    ib_bth_h bth;
-    ib_ext_h ext;
-}
-
-parser InfiniBandParser(
-    packet_in pkt,
-    out ib_hdr_t ib_hdr) {
-    state start {
-        pkt.extract(ib_hdr.bth);
-        transition select(ib_hdr.bth.opcode) {
-            ib_opcode_t.UD_SEND_ONLY : parse_deth;
-            ib_opcode_t.UD_SEND_ONLY_WITH_IMMEDIATE : parse_deth;
-            default: accept;
-        }
-    }
-
-    state parse_deth {
-        pkt.extract(ib_hdr.ext.deth);
-        transition select(ib_hdr.ext.deth.src_qp)
-        {
-            default: accept;
-        }
-    }
-}
-
-#endif // INFINIBAND_PARSER_P4
+#endif // P4WS_INFINIBAND_BASE_P4

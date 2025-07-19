@@ -22,8 +22,8 @@
  * Author: NTLPY <59137305+NTLPY@users.noreply.github.com>
  */
 
-#ifndef TCP_P4
-#define TCP_P4
+#ifndef P4WS_TCP_P4
+#define P4WS_TCP_P4
 
 enum bit<8> tcp_flags_e {
     TCP_FIN = 0x01, // No more data from sender
@@ -49,4 +49,4 @@ header tcp_h {
     bit<16> urg_ptr;
 }
 
-#endif // TCP_P4
+#endif // P4WS_TCP_P4

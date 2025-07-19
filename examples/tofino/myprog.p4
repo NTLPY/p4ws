@@ -25,9 +25,9 @@
 #include <tna.p4>
 #endif
 
-#include <utils.p4>
-#include <ether.p4>
-#include <ip.p4>
+#include <p4ws/utils.p4>
+#include <p4ws/ether.p4>
+#include <p4ws/ip.p4>
 
 struct header_t {
     eth_h eth;

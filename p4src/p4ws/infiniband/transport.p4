@@ -22,8 +22,8 @@
  * Author: NTLPY <59137305+NTLPY@users.noreply.github.com>
  */
 
-#ifndef INFINIBAND_TRANSPORT_P4
-#define INFINIBAND_TRANSPORT_P4
+#ifndef P4WS_INFINIBAND_TRANSPORT_P4
+#define P4WS_INFINIBAND_TRANSPORT_P4
 
 //!< Type of Partition Key
 typedef bit<16> ib_p_key_t;
@@ -166,4 +166,4 @@ header ib_deth_h {
     ib_qp_t     src_qp;
 }
 
-#endif // INFINIBAND_TRANSPORT_P4
+#endif // P4WS_INFINIBAND_TRANSPORT_P4

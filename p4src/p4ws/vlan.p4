@@ -1,9 +1,8 @@
 /**
- * InfiniBand Definitions
+ * VLAN Definitions
  *
  * Reference:
- * - InfiniBand Architecture Specification Volume 1, Release 1.4
- * - linux/include/rdma/ib_verbs.h
+ * - linux/include/linux/if_vlan.h
  *
  * Copyright 2025 NTLPY
  *
@@ -22,11 +21,18 @@
  * Author: NTLPY <59137305+NTLPY@users.noreply.github.com>
  */
 
-#ifndef INFINIBAND_ALL_P4
-#define INFINIBAND_ALL_P4
+#ifndef P4WS_VLAN_P4
+#define P4WS_VLAN_P4
 
-#include <infiniband/base.p4>
-#include <infiniband/transport.p4>
-#include <infiniband/parser.p4>
+#include <p4ws/ether.p4>
 
-#endif // INFINIBAND_ALL_P4
+typedef bit<12> vlan_id_t;
+
+header vlan_h {
+    bit<3>          pcp;
+    bit<1>          cfi;
+    vlan_id_t       vid;
+    ether_type_t    encap_proto;
+}
+
+#endif // P4WS_VLAN_P4

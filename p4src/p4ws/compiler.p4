@@ -1,9 +1,5 @@
 /**
- * InfiniBand Definitions
- *
- * Reference:
- * - InfiniBand Architecture Specification Volume 1, Release 1.4
- * - linux/include/rdma/ib_verbs.h
+ * Compiler Utilities
  *
  * Copyright 2025 NTLPY
  *
@@ -22,15 +18,24 @@
  * Author: NTLPY <59137305+NTLPY@users.noreply.github.com>
  */
 
-#ifndef INFINIBAND_BASE_P4
-#define INFINIBAND_BASE_P4
+#ifndef P4WS_COMPILER_P4
+#define P4WS_COMPILER_P4
 
-//!< 4.1.3 Local Identifiers (C4-5)
-typedef bit<16> ib_lid_t;
-//!< 4.1.1 Global Identifiers (C4-3)
-typedef bit<128> ib_gid_t;
+/**
+ * Some P4 compilers do not support header unions.
+ * This is a workaround to allow cross-compiler compatibility.
+ * It replaces `header_union` with `struct` if header unions are unsupported.
+ */
+#ifdef P4WS_ALLOW_HEADER_UNION_CROSS_COMPILER
 
-//!< UDP Port of RoCEv2
-const bit<16> ROCE_V2_UDP_DPORT = 4791;
+#if (defined __TARGET_TOFINO__ && (__p4c_major__ < 9 || (__p4c_major__ == 9 && __p4c_minor__ < 13) || (__p4c_major__ == 9 && __p4c_minor__ == 13 && __p4c_patchlevel__ <= 3)))
+#define HEADER_UNION_UNSUPPORTED
+#endif
 
-#endif // INFINIBAND_BASE_P4
+#ifdef HEADER_UNION_UNSUPPORTED
+#define header_union struct
+#endif
+
+#endif
+
+#endif // P4WS_COMPILER_P4

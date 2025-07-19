@@ -22,8 +22,8 @@
  * Author: NTLPY <59137305+NTLPY@users.noreply.github.com>
  */
 
-#ifndef IP_P4
-#define IP_P4
+#ifndef P4WS_IP_P4
+#define P4WS_IP_P4
 
 typedef bit<32> ip_addr_t;
 
@@ -53,4 +53,4 @@ header ip_h {
     ip_addr_t       daddr;
 }
 
-#endif // IP_P4
+#endif // P4WS_IP_P4

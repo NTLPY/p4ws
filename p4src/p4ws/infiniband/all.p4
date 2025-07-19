@@ -1,9 +1,9 @@
 /**
- * UDP Definitions
+ * InfiniBand Definitions
  *
  * Reference:
- * - RFC 768
- * - linux/include/uapi/linux/udp.h
+ * - InfiniBand Architecture Specification Volume 1, Release 1.4
+ * - linux/include/rdma/ib_verbs.h
  *
  * Copyright 2025 NTLPY
  *
@@ -22,14 +22,11 @@
  * Author: NTLPY <59137305+NTLPY@users.noreply.github.com>
  */
 
-#ifndef UDP_P4
-#define UDP_P4
+#ifndef P4WS_INFINIBAND_ALL_P4
+#define P4WS_INFINIBAND_ALL_P4
 
-header udp_h {
-    bit<16> source;
-    bit<16> dest;
-    bit<16> len;
-    bit<16> check;
-}
+#include <p4ws/infiniband/base.p4>
+#include <p4ws/infiniband/transport.p4>
+#include <p4ws/infiniband/parser.p4>
 
-#endif // UDP_P4
+#endif // P4WS_INFINIBAND_ALL_P4
