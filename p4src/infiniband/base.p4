@@ -22,7 +22,7 @@
  * Author: NTLPY <59137305+NTLPY@users.noreply.github.com>
  */
 
-#ifdef INFINIBAND_BASE_P4
+#ifndef INFINIBAND_BASE_P4
 #define INFINIBAND_BASE_P4
 
 //!< 4.1.3 Local Identifiers (C4-5)
