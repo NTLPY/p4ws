@@ -26,7 +26,7 @@
 #define IP_P4
 
 typedef bit<32> ip_addr_t;
-typedef bit<16> ip_protocol_t;
+typedef bit<8> ip_protocol_t;
 
 /* Standard well-defined IP protocols.  */
 enum ip_protocol_t ip_protocol_e {
