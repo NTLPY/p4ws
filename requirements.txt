@@ -1,3 +1,4 @@
 setuptools
 setuptools-scm
 build
+commentjson >= 0.8.0
