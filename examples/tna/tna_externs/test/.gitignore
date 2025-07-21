@@ -1,0 +1,16 @@
+# p4ws loadmn
+out.json
+shell.sh
+
+# tofino-model
+*.log
+*.pcap
+logs/
+pcap_output/
+
+# switchd
+bf_drivers.log*
+zlog-cfg-cur
+
+# config files
+config.py
