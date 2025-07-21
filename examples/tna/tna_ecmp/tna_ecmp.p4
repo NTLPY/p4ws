@@ -16,15 +16,7 @@
  * Author: NTLPY <59137305+NTLPY@users.noreply.github.com>
  */
 
-#include <core.p4>
-#if __TARGET_TOFINO__ == 3
-#include <t3na.p4>
-#elif __TARGET_TOFINO__ == 2
-#include <t2na.p4>
-#else
-#include <tna.p4>
-#endif
-
+#include <p4ws/arch.p4>
 #include <p4ws/ether.p4>
 #include <p4ws/ip.p4>
 #include <p4ws/ipv6.p4>
