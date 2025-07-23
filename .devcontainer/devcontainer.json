@@ -1,4 +1,8 @@
 {
     "image": "docker.io/library/ubuntu:22.04",
-    "features": {}
+    "features": {
+        "ghcr.io/devcontainers-extra/features/apt-packages:1": {
+            "packages": "build-essential,git,gpg"
+        }
+    }
 }
