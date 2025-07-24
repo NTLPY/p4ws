@@ -8,7 +8,7 @@ dynamic = ["version"]
 dependencies = [
   "commentjson >= 0.8.0"
 ]
-requires-python = ">=3.5"
+requires-python = ">=3.10"
 authors = [
   { name="NTLPY", email="59137305+NTLPY@users.noreply.github.com" },
 ]
@@ -17,11 +17,12 @@ maintainers = [
 ]
 description = "P4 Workshop"
 readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICEN[CS]E.*"]
 keywords = ["network", "p4"]
 classifiers = [
   "Development Status :: 2 - Pre-Alpha",
   "Environment :: Console",
-  "License :: OSI Approved :: Apache Software License",
   "Natural Language :: English",
   "Programming Language :: Python :: 3",
   "Operating System :: POSIX :: Linux",
