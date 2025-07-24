@@ -5,7 +5,6 @@ import json
 import os
 import re
 import tarfile
-from distutils.sysconfig import get_python_lib
 from re import match
 from subprocess import CalledProcessError, check_output
 from typing import Literal, TextIO
@@ -185,14 +184,20 @@ def get_bfsde_python_path():
         path(str): Path to python site-packages of SDE.
 
     Raises:
-        FileNotFoundError: Install path of Barefoot SDE not found.
+        FileNotFoundError: python3 not found in PATH, site-packages not found or install path of Barefoot SDE not found.
 
     References:
         - ${SDE}/run_p4_tests.sh
     """
-    python_lib = get_python_lib(
-        prefix='', standard_lib=True, plat_specific=True)
-    return get_bfsde_install(python_lib, "site-packages")
+    # Do not use `distutils.sysconfig.get_python_lib` in current interpreter,
+    # because it may return wrong path if the interpreter is not the one used with SDE.
+    python_lib = check_output(
+        ["python3", "-c", "from distutils.sysconfig import get_python_lib; print(get_python_lib(prefix='', standard_lib=True, plat_specific=True))"]).decode("utf-8").strip()
+    python_path = get_bfsde_install(python_lib, "site-packages")
+    if not os.path.exists(python_path):
+        raise FileNotFoundError(
+            f"Python3 site-packages not found: {python_lib}")
+    return python_path
 
 
 def get_bfsde_python_path_for_p4_test(arch: Literal["", "tofino", "tofino2", "tofino2m", "tofino3"] = ""):
