@@ -401,12 +401,9 @@ def bfsde_untar_program(tar: tarfile.TarFile):
             "Invalid bf-p4c package file: 'program.conf' not found")
     obj = json.load(conf_file)
     bfsde_filter_target_config(obj, ".", False)
+
+    tar.extractall()
+
+    # Make sure to override the program.conf
     with open("program.conf", "w") as f:
         json.dump(obj, f)
-
-    def filter_conf(member: tarfile.TarInfo, dest_path: str):
-        if member.name == "program.conf":
-            return None
-        return member
-
-    tar.extractall(filter=filter_conf)
