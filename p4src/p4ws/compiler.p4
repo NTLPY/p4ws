@@ -26,7 +26,7 @@
  * This is a workaround to allow cross-compiler compatibility.
  * It replaces `header_union` with `struct` if header unions are unsupported.
  */
-#ifdef P4WS_ALLOW_HEADER_UNION_CROSS_COMPILER
+#ifndef P4WS_DISABLE_HEADER_UNION_CROSS_COMPILER
 
 #if (defined __TARGET_TOFINO__ && (__p4c_major__ < 9 || (__p4c_major__ == 9 && __p4c_minor__ < 13) || (__p4c_major__ == 9 && __p4c_minor__ == 13 && __p4c_patchlevel__ <= 3)))
 #define HEADER_UNION_UNSUPPORTED
