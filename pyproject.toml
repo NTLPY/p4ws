@@ -18,7 +18,7 @@ maintainers = [
 description = "P4 Workshop"
 readme = "README.md"
 license = "Apache-2.0"
-license-files = ["LICEN[CS]E.*"]
+license-files = ["LICENSE"]
 keywords = ["network", "p4"]
 classifiers = [
   "Development Status :: 2 - Pre-Alpha",
