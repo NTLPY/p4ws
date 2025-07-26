@@ -156,8 +156,14 @@ function(BFSDE_ADD_P4_PROGRAM t p4target p4src p4lang p4arch bfrt p4rt withpd wi
   bfsde_p4_check_p4archtarget("${p4lang}" "${p4arch}" "${p4target}")
   bfsde_p4_check_rt("${bfrt}" "${p4rt}" "${withpd}" "${withthrift}")
   p4_check_p4flags()
-  list(JOIN COMPUTED_P4PPFLAGS " " COMPUTED_P4PPFLAGS)
-  list(JOIN COMPUTED_P4FLAGS " " COMPUTED_P4FLAGS)
+  set(COMPUTED_P4PPFLAGS_ARGS "")
+  foreach (p4ppflag ${COMPUTED_P4PPFLAGS})
+    list(APPEND COMPUTED_P4PPFLAGS_ARGS "${p4ppflag}")
+  endforeach ()
+  set(COMPUTED_P4FLAGS_ARGS "")
+  foreach (p4flag ${COMPUTED_P4FLAGS})
+    list(APPEND COMPUTED_P4FLAGS_ARGS "${p4flag}")
+  endforeach ()
   bfsde_p4_check_pdflags()
   if (("${p4target}" STREQUAL "tofino2m") OR
       ("${p4target}" STREQUAL "tofino2u") OR
@@ -190,7 +196,16 @@ function(BFSDE_ADD_P4_PROGRAM t p4target p4src p4lang p4arch bfrt p4rt withpd wi
   # compile the p4 program
   find_bf_p4c(REQUIRED)
   find_bf_driver(REQUIRED)
-  set(P4_INCLUDE_DIRECTORIES "$<TARGET_PROPERTY:${t},P4_INCLUDE_DIRECTORIES>")
+  get_target_property(EXISTING_P4_INCLUDE_DIRECTORIES "${t}" P4_INCLUDE_DIRECTORIES)
+  if (EXISTING_P4_INCLUDE_DIRECTORIES)
+    set(P4_INCLUDE_DIRECTORIES "${EXISTING_P4_INCLUDE_DIRECTORIES}")
+  else ()
+    set(P4_INCLUDE_DIRECTORIES "")
+  endif ()
+  set(COMPUTED_P4_INCLUDE_FLAGS_ARGS "")
+  foreach (dir ${P4_INCLUDE_DIRECTORIES})
+    list(APPEND COMPUTED_P4_INCLUDE_FLAGS_ARGS "-I${dir}")
+  endforeach ()
   if (bfrt)
     add_custom_command(OUTPUT ${output_files}
       COMMAND "${BF_P4C}"
@@ -199,9 +214,9 @@ function(BFSDE_ADD_P4_PROGRAM t p4target p4src p4lang p4arch bfrt p4rt withpd wi
         --arch "${p4arch}"
         ${rt_commands}
         -o "${CMAKE_CURRENT_BINARY_DIR}/${target_path}"
-        "$<$<BOOL:${P4_INCLUDE_DIRECTORIES}>:-I$<JOIN:${P4_INCLUDE_DIRECTORIES},;-I>>"
-        ${COMPUTED_P4PPFLAGS}
-        ${COMPUTED_P4FLAGS}
+        ${COMPUTED_P4_INCLUDE_FLAGS_ARGS}
+        ${COMPUTED_P4PPFLAGS_ARGS}
+        ${COMPUTED_P4FLAGS_ARGS}
         ${P4FLAGS_INTERNAL}
         -g
         --program-name "${t}"
@@ -209,7 +224,7 @@ function(BFSDE_ADD_P4_PROGRAM t p4target p4src p4lang p4arch bfrt p4rt withpd wi
       COMMAND "${BF_P4C_GEN_BFRT_CONF}" --name "${t}" --device "${chiptype}" --testdir "${CMAKE_CURRENT_BINARY_DIR}/${target_path}"
          --installdir "${CMAKE_CURRENT_BINARY_DIR}/${target_path}" --pipe `${BF_P4C_MANIFEST_CONFIG} --pipe "${CMAKE_CURRENT_BINARY_DIR}/${target_path}/manifest.json" `
       DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${p4src}"
-      COMMAND_EXPAND_LISTS
+      VERBATIM
     )
   else()
     add_custom_command(OUTPUT ${output_files}
