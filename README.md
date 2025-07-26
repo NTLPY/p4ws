@@ -3,22 +3,23 @@ P4 Workshop
 
 P4 Workshop, a collection of useful tools for P4 developments
 
+**Contents**
+- [Features](#features)
+- [Build \& Install](#build--install)
 
-Prerequisites
+
+Features
 ----------------------------------------
 
-*loadmn: Load Mininet*
-1. `mininet`
-2. Python3 packages: `mininet`
+- *P4WS Build*: Cross-target cmake build system for P4 programs.
+- *P4WS P4 Includes*: Includes for P4 programs.
+- *P4WS Python Package*: Python package provides tools for P4 development:
+  - Load mininet topology from P4 program.
+  - Patch P4 SDEs.
+  - Tar or untar P4 programs.
 
 
 Build & Install
 ----------------------------------------
 
-Build and install p4ws:
-```bash
-mkdir -p build
-cd build
-cmake ..
-make && make install
-```
+See [Build P4 Workshop](./docs/build-p4ws.md) for details.
