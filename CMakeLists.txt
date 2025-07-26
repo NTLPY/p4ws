@@ -5,7 +5,11 @@ project(p4ws VERSION 1.0)
 # p4ws Python Packages
 ###############################################################################
 
-find_package(Python3 COMPONENTS Interpreter REQUIRED)
+if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12")
+  find_package(Python3 COMPONENTS Interpreter REQUIRED)
+else ()
+  set(Python3_EXECUTABLE "python3")
+endif ()
 
 # Found package name
 message(STATUS "Package name: ${PROJECT_NAME}")
