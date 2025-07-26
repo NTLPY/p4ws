@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.2)
 project(p4ws VERSION 1.0)
 
 ###############################################################################
