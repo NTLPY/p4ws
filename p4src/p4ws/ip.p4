@@ -38,6 +38,14 @@ enum bit<8> ip_protocol_t {
     RAW     = 255,  // Raw IP packet
 }
 
+enum bit<2> ip_ecn_t {
+	NOT_ECT = 0,    // Not ECN-Capable Transport
+	ECT_1   = 1,    // ECN-Capable Transport (1)
+	ECT_0   = 2,    // ECN-Capable Transport (0)
+	CE      = 3,    // Congestion Experienced
+	MASK    = 3,
+};
+
 header ip_h {
     bit<4>          version;
     bit<4>          ihl;
