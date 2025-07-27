@@ -224,7 +224,6 @@ function(BFSDE_ADD_P4_PROGRAM t p4target p4src p4lang p4arch bfrt p4rt withpd wi
       COMMAND "${BF_P4C_GEN_BFRT_CONF}" --name "${t}" --device "${chiptype}" --testdir "${CMAKE_CURRENT_BINARY_DIR}/${target_path}"
          --installdir "${CMAKE_CURRENT_BINARY_DIR}/${target_path}" --pipe `${BF_P4C_MANIFEST_CONFIG} --pipe "${CMAKE_CURRENT_BINARY_DIR}/${target_path}/manifest.json" `
       DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${p4src}"
-      VERBATIM
     )
   else()
     add_custom_command(OUTPUT ${output_files}
