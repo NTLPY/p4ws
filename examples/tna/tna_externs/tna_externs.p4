@@ -153,6 +153,8 @@ control SwitchIngress(
     Hash<bit<16>>(HashAlgorithm_t.IDENTITY) hash_identity_16;
     Hash<bit<32>>(HashAlgorithm_t.IDENTITY) hash_identity_32;
 
+    Wred<bit<32>, bit<8>>(4, 1, 0) wred;
+
     BypassEgress() bypass_egress;
 
     apply {
@@ -168,6 +170,13 @@ control SwitchIngress(
         }
         if (hdr.debug.op == DEBUG_OP_HASH_IDENTITY_32) {
             hdr.debug.out32 = hash_identity_32.get(hdr.debug.in32);
+        }
+
+        //
+        // WRED
+        //
+        if (hdr.debug.op == DEBUG_OP_WRED) {
+            hdr.debug.out8 = wred.execute(hdr.debug.in32, 0);
         }
 
         // Just echo it back to the ingress port.
