@@ -16,7 +16,10 @@ message(STATUS "Package name: ${PROJECT_NAME}")
 
 # Found package version
 execute_process(
-  COMMAND ${Python3_EXECUTABLE} -m setuptools_scm
+  COMMAND ${Python3_EXECUTABLE} -c "import setuptools_scm; print(setuptools_scm.get_version())"
+    # Backward compatibility for setuptools-scm <= 6.4.0, which will print 'Guessed version:' by `python3 -m setuptools_scm`
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    # Backward compatibility for setuptools-scm ?, which will only work under root directory
   OUTPUT_VARIABLE PACKAGE_VERSION
   OUTPUT_STRIP_TRAILING_WHITESPACE
   RESULT_VARIABLE RET
