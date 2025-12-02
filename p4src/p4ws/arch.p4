@@ -21,6 +21,11 @@
 #ifndef P4WS_ARCH_P4
 #define P4WS_ARCH_P4
 
+/**
+ * P4 architecture is not provided, guess it.
+ */
+#ifndef __P4_ARCH__
+
 #ifdef __TARGET_TOFINO__
 
 #if __TARGET_TOFINO__ == 3
@@ -39,5 +44,7 @@
 #else // __TARGET_TOFINO__ not defined
 #error "Architecture not determined."
 #endif
+
+#endif // __P4_ARCH__
 
 #endif // P4WS_ARCH_P4
