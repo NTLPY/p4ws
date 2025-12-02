@@ -1,8 +1,32 @@
 """Utils for BMv2."""
 
+import os
 from re import match
 from shutil import which
 from subprocess import CalledProcessError, check_output
+
+BMV2_INSTALL = ""
+
+
+def get_bmv2_install(*suffix: str):
+    """Get path to install path of BMv2.
+
+    Check envs below to check install path to BMv2:
+    1. `BMV2_INSTALL`
+
+    Returns:
+        A str of install path to BMv2.
+
+    Raises:
+        FileNotFoundError: Install path of BMv2 not found.
+    """
+
+    global BMV2_INSTALL
+    if BMV2_INSTALL == "":
+        BMV2_INSTALL = os.environ.get("BMV2_INSTALL", "")
+    if BMV2_INSTALL == "":
+        raise FileNotFoundError("Install path of BMv2 not found")
+    return os.path.join(BMV2_INSTALL, *suffix)
 
 
 def get_bmv2_model(name: str):
@@ -29,6 +53,9 @@ def get_bmv2_model(name: str):
 
     ld_path = ""
     model = which(name)
+
+    if model is None:
+        model = which(name, path=get_bmv2_install("bin"))
 
     if model is None:
         raise FileNotFoundError(f"{name} not found in PATH")
