@@ -1,0 +1,7 @@
+# p4ws loadmn
+out.json
+shell.sh
+
+# logs
+logs/
+pcap_output/
