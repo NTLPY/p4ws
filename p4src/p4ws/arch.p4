@@ -22,29 +22,45 @@
 #define P4WS_ARCH_P4
 
 /**
- * P4 architecture is not provided, guess it.
+ * Determine P4 architecture.
  */
-#ifndef __P4_ARCH__
-
-#ifdef __TARGET_TOFINO__
-
-#if __TARGET_TOFINO__ == 3
-#define __P4_ARCH__ t3na
-#include <t3na.p4>
-#elif __TARGET_TOFINO__ == 2
-#define __P4_ARCH__ t2na
-#include <t2na.p4>
-#elif __TARGET_TOFINO__ == 1
+#if defined(__P4_ARCH_TNA__)
 #define __P4_ARCH__ tna
-#include <tna.p4>
+#elif defined(__P4_ARCH_T2NA__)
+#define __P4_ARCH__ t2na
+#elif defined(__P4_ARCH_T3NA__)
+#define __P4_ARCH__ t3na
+#else
+
+// P4 architecture is not provided, guess it.
+#ifdef __TARGET_TOFINO__
+#if __TARGET_TOFINO__ == 1
+#define __P4_ARCH_TNA__
+#define __P4_ARCH__ tna
+#elif __TARGET_TOFINO__ == 2
+#define __P4_ARCH_T2NA__
+#define __P4_ARCH__ t2na
+#elif __TARGET_TOFINO__ == 3
+#define __P4_ARCH_T3NA__
+#define __P4_ARCH__ t3na
 #else
 #error "Unsupported TNA version."
 #endif
+#endif // __TARGET_TOFINO__
 
-#else // __TARGET_TOFINO__ not defined
-#error "Architecture not determined."
 #endif
 
-#endif // __P4_ARCH__
+/**
+ * Include P4 architecture headers.
+ */
+#if defined(__P4_ARCH_TNA__)
+#include <tna.p4>
+#elif defined(__P4_ARCH_T2NA__)
+#include <t2na.p4>
+#elif defined(__P4_ARCH_T3NA__)
+#include <t3na.p4>
+#else
+#error "Unknown or unsupported P4 architecture."
+#endif
 
 #endif // P4WS_ARCH_P4
