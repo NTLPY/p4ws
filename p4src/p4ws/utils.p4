@@ -25,6 +25,8 @@ struct empty_header_t {}
 
 struct empty_metadata_t {}
 
+#if defined(__P4_ARCH_TNA__) || defined(__P4_ARCH_T2NA__) || defined(__P4_ARCH_T3NA__)
+
 parser TofinoIngressParser(
         packet_in pkt,
         out ingress_intrinsic_metadata_t ig_intr_md) {
@@ -112,5 +114,7 @@ control EmptyEgress(
         inout egress_intrinsic_metadata_for_output_port_t eg_intr_oport_md) {
     apply {}
 }
+
+#endif // defined(__P4_ARCH_TNA__) || defined(__P4_ARCH_T2NA__) || defined(__P4_ARCH_T3NA__)
 
 #endif // P4WS_UTILS_P4

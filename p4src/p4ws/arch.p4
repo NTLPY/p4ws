@@ -24,7 +24,13 @@
 /**
  * Determine P4 architecture.
  */
-#if defined(__P4_ARCH_TNA__)
+#if defined(__P4_ARCH_V1MODEL__)
+#define __P4_ARCH__ v1model
+#elif defined(__P4_ARCH_PSA__)
+#define __P4_ARCH__ psa
+#elif defined(__P4_ARCH_PNA__)
+#define __P4_ARCH__ pna
+#elif defined(__P4_ARCH_TNA__)
 #define __P4_ARCH__ tna
 #elif defined(__P4_ARCH_T2NA__)
 #define __P4_ARCH__ t2na
@@ -53,7 +59,13 @@
 /**
  * Include P4 architecture headers.
  */
-#if defined(__P4_ARCH_TNA__)
+#if defined(__P4_ARCH_V1MODEL__)
+#include <v1model.p4>
+#elif defined(__P4_ARCH_PSA__)
+#include <psa.p4>
+#elif defined(__P4_ARCH_PNA__)
+#include <pna.p4>
+#elif defined(__P4_ARCH_TNA__)
 #include <tna.p4>
 #elif defined(__P4_ARCH_T2NA__)
 #include <t2na.p4>

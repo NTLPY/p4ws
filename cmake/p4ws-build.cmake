@@ -8,6 +8,7 @@
 #
 # cmake_target - cmake target name
 # p4target     - P4 target
+# - bmv2         - BMv2 (see below)
 # - tofino       - Intel Tofino
 # - tofino2      - Intel Tofino2
 # - tofino2m     - Intel Tofino2M
@@ -25,6 +26,9 @@
 # p4arch       - P4 architecture
 # | P4 Target | Supported architectures |
 # | --------- | ----------------------- |
+# | bmv2      | v1model                 |
+# | bmv2      | psa                     |
+# | bmv2      | pna                     |
 # | tofino    | default, tna, v1model   |
 # | tofino2   | default, t2na           |
 # | tofino2m  | t2na                    |
@@ -33,6 +37,8 @@
 # | tofino3   | default, t2na, t3na     |
 #
 # apis       - a list for API interfaces
+# - for BMv2:
+#   - p4rt       - generate P4Runtime API configuration
 # - for Tofinos:
 #   - bfrt       - generate BFRuntime API configuration
 #   - p4rt       - generate P4Runtime API configuration
@@ -109,13 +115,24 @@ function(P4_CHECK_P4FLAGS)
 endfunction()
 
 function(ADD_P4_PROGRAM t p4target p4src p4lang p4arch apis)
-  # Tofinos
-  if((p4target STREQUAL "tofino") OR
-     (p4target STREQUAL "tofino2") OR
-     (p4target STREQUAL "tofino2m") OR
-     (p4target STREQUAL "tofino2u") OR
-     (p4target STREQUAL "tofino2a0") OR
-     (p4target STREQUAL "tofino3"))
+  if(p4target STREQUAL "bmv2")
+    set(p4rt False)
+    foreach(api IN LISTS apis)
+      if(api STREQUAL "p4rt")
+        set(p4rt True)
+      else()
+        message(FATAL_ERROR "${COLOR_ERR}Unknown API: ${api}${COLOR_RST}")
+      endif()
+    endforeach()
+
+    include(bmv2-build)
+    bmv2_add_p4_program("${t}" "${p4target}" "${p4src}" "${p4lang}" "${p4arch}" "${p4rt}")
+  elseif((p4target STREQUAL "tofino") OR
+         (p4target STREQUAL "tofino2") OR
+         (p4target STREQUAL "tofino2m") OR
+         (p4target STREQUAL "tofino2u") OR
+         (p4target STREQUAL "tofino2a0") OR
+         (p4target STREQUAL "tofino3"))
 
     set(bfrt False)
     set(p4rt False)

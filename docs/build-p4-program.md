@@ -61,6 +61,7 @@ add_dependencies(<cmake_target> <cmake_target>-<p4target>)
 *Arguments*
 - `<cmake_target>`: The prefix of the CMake target for the P4 program.
 - `<p4target>`: The P4 target:
+  - bmv2         - Behavioral Model version 2
   - tofino       - Intel Tofino
   - tofino2      - Intel Tofino2
   - tofino2m     - Intel Tofino2M
