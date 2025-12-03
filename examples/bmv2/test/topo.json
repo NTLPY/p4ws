@@ -2,7 +2,7 @@
     "classes": {
         "simple-switch": {
             "parent": "switch",
-            "cls": "p4ws.mnhlp.SimpleSwitch",
+            "cls": "p4ws.mnhlp.SimpleSwitchGrpc",
             "log_console": true,
             "pcaps_dir": "pcap_output"
         }
@@ -14,6 +14,7 @@
             "class": "simple-switch",
             "p4_target_conf": "../build/myprog/bmv2/main.json",
             "listenPort": 9090,
+            "grpc_server_port": 9559,
             "sw_stdout": "logs/s1-stdout.log",
             "sw_stderr": "logs/s1-stderr.log"
         },
@@ -22,6 +23,7 @@
             "class": "simple-switch",
             "p4_target_conf": "../build/myprog/bmv2/main.json",
             "listenPort": 9091,
+            "grpc_server_port": 9560,
             "sw_stdout": "logs/s2-stdout.log",
             "sw_stderr": "logs/s2-stderr.log"
         }

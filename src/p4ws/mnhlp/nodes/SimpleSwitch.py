@@ -166,17 +166,20 @@ class SimpleSwitch(Switch):
         SimpleSwitch.ld_library_path, SimpleSwitch.simple_switch_exec = bmv2.get_bmv2_simple_switch()[
             :2]
 
-    def start(self, controllers):
+    def start(self, controllers, exec: Union[str, None] = None, ld_library_path: Union[str, None] = None, extra_args=[]):
         """Start a SimpleSwitch instance.
 
         Args:
             controllers: Not used.
+            exec: Executable path, None for path to simple_switch.
+            ld_library_path: LD_LIBRARY_PATH, None for path including bmv2 libraries.
+            extra_args: List of extra target specific arguments.
         """
 
         # simple_switch args
         # executable
-        args = [SimpleSwitch.simple_switch_exec]
-        env = {"LD_LIBRARY_PATH": SimpleSwitch.ld_library_path}
+        args = [SimpleSwitch.simple_switch_exec if exec is None else exec]
+        env = {"LD_LIBRARY_PATH": SimpleSwitch.ld_library_path if ld_library_path is None else ld_library_path}
 
         # Ports
         ports_args = []
@@ -219,6 +222,10 @@ class SimpleSwitch(Switch):
             self.sw_stdout, str) else self.sw_stdout
         sw_stderr = open(self.sw_stderr, "w") if isinstance(
             self.sw_stderr, str) else self.sw_stderr
+
+        if len(extra_args) > 0:
+            args.append("--")
+            args.extend(extra_args)
 
         self.sw = self.popen(
             args, env=env, stdout=sw_stdout, stderr=sw_stderr)

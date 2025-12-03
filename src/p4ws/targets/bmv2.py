@@ -105,6 +105,22 @@ def get_bmv2_simple_switch():
     return get_bmv2_model("simple_switch")
 
 
+def get_bmv2_simple_switch_grpc():
+    """Get `simple_switch_grpc`.
+
+    Get `LD_LIBRARY_PATH`, path to, version and commit of `simple_switch_grpc`.
+
+    `CAP_NET_RAW` privilege is required.
+
+    Returns:
+        A tuple of str include `LD_LIBRARY_PATH`, path to, version and commit of `simple_switch_grpc`.
+
+    Raises:
+        See get_bmv2_model for possible exceptions.
+    """
+    return get_bmv2_model("simple_switch_grpc")
+
+
 def get_bmv2_psa_switch():
     """Get `psa_switch`.
 
