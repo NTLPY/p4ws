@@ -1,0 +1,29 @@
+{
+    "classes": {
+        "tofino": {
+            "parent": "switch",
+            "cls": "p4ws.mnhlp.TofinoModel",
+            "log_dir": "logs",
+            "sw_stdout": "logs/model_stdout.log",
+            "sw_stderr": "logs/model_stderr.log"
+        }
+    },
+    "hosts": [ "h1", "h2" ],
+    "switches": {
+        "s1":
+        {
+            "class": "tofino",
+            "p4_target_conf": "../build/myprog/tofino/myprog.conf"
+        },
+        "s2":
+        {
+            "class": "tofino",
+            "p4_target_conf": "../build/myprog/tofino/myprog.conf"
+        }
+    },
+    "links": [
+        [ "h1", "s1", 1, 1 ],
+        [ "s1", "s2", 2, 1 ],
+        [ "h2", "s2", 1, 2 ]
+    ]
+}
